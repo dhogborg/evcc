@@ -113,6 +113,29 @@ components:
         residualPower:
           description: Configured grid operating point in W. Positive values maintain grid import.
           type: number
+        hourlyImportLimit:
+          description: Maximum grid import per clock hour in kWh. Zero disables the budget.
+          type: number
+        hourlyImport:
+          description: Current clock-hour accounting and permitted grid power in W.
+          type: object
+          properties:
+            used:
+              type: number
+            remaining:
+              type: number
+            allowedPower:
+              type: number
+            reset:
+              type: string
+            status:
+              type: string
+          required:
+            - used
+            - remaining
+            - allowedPower
+            - reset
+            - status
         gridExportLimit:
           description: Static grid export power limit in W used as optimizer constraint, 0 = disabled. An active HEMS curtailment takes precedence.
           type: number
@@ -507,6 +530,42 @@ components:
         - unknown
         - waitingforauthorization
         - disconnectrequired
+    ChargingRestrictionRule:
+      description: A charging location with a charger, an optional dedicated meter and an optional vehicle.
+      type: object
+      properties:
+        months:
+          type: array
+          items:
+            type: number
+        weekdays:
+          type: array
+          items:
+            type: number
+        start:
+          type: string
+        end:
+          type: string
+      required:
+        - months
+        - weekdays
+        - start
+        - end
+    ChargingRestrictions:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        timezone:
+          type: string
+        rules:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChargingRestrictionRule"
+      required:
+        - enabled
+        - timezone
+        - rules
     Circuit:
       description: A load management circuit limiting power and current of its assigned loadpoints.
       type: object
@@ -791,9 +850,18 @@ components:
         - database
         - org
     Loadpoint:
-      description: A charging location with a charger, an optional dedicated meter and an optional vehicle.
       type: object
       properties:
+        chargingRestrictions:
+          $ref: "#/components/schemas/ChargingRestrictions"
+          description: Recurring local intervals blocking Smart charging only.
+        scheduleBlocked:
+          description: Smart charging is currently blocked by a recurring interval.
+          type: boolean
+        scheduleNextTransition:
+          description: Next combined schedule transition, with UTC offset.
+          type: string
+          nullable: true
         name:
           description: Unique loadpoint identifier used in API routes and configuration.
           type: string

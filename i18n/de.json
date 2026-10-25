@@ -1164,6 +1164,21 @@
       "template": "Hersteller",
       "titleAdd": "Fahrzeug hinzufügen",
       "titleEdit": "Fahrzeug bearbeiten"
+    },
+    "hourlyImport": {
+      "title": "Stündliches Bezugslimit",
+      "enabled": "Stündliches Bezugslimit aktivieren",
+      "limit": "Maximaler Netzbezug je voller Stunde",
+      "description": "Die Ladeleistung passt sich an das Energiebudget jeder vollen Stunde an, zum Beispiel 13:00–14:00. Der gesamte Haushaltsverbrauch zählt mit. Aus den verbleibenden kWh und der Restzeit wird die zulässige Leistung in kW berechnet.",
+      "caution": "Ein kumulativer Netzbezugszähler ist erforderlich. Einspeisung erhöht das Budget nicht. Bei fehlenden Messwerten oder unbekanntem Stundenverbrauch pausiert das Laden. Eine Reserve berücksichtigt Mess- und Schaltverzögerungen. Nicht steuerbare Verbraucher können das Budget weiterhin überschreiten. Die Stunden gelten in Europe/Stockholm.",
+      "readings": "Bezogen: {used} kWh · Verbleibend: {remaining} kWh · Bezugsleistung: {power} kW",
+      "status": {
+        "disabled": "Deaktiviert.",
+        "active": "Die adaptive Bezugsregelung ist aktiv.",
+        "exhausted": "Stundenbudget aufgebraucht. Laden erfordert ausreichende lokale Erzeugung.",
+        "awaitingHour": "Stundenanfang unbekannt. Laden pausiert bis zur nächsten vollen Stunde mit gültigen Messwerten.",
+        "meterUnavailable": "Netzbezugsmesswerte fehlen oder sind veraltet. Laden pausiert."
+      }
     }
   },
   "energy": {
@@ -1837,7 +1852,24 @@
       "waitForVehicle": "Ladebereit. Warte auf Fahrzeug …",
       "welcome": "Kurze initiale Ladung zur Bestätigung der Verbindung."
     },
-    "vehicles": "Parkplatz"
+    "vehicles": "Parkplatz",
+    "chargingRestrictions": {
+      "title": "Ladebeschränkungen",
+      "description": "Laden im Modus Smart während wiederkehrender Zeiträume sperren. Schnellladen umgeht diese Sperren. Das stündliche Bezugslimit gilt in jedem Modus. Ein Ende vor dem Beginn gilt über Mitternacht; Monate und Wochentage beziehen sich auf den Starttag.",
+      "enabled": "Zeitliche Beschränkungen für Smart aktivieren",
+      "timezone": "Zeitzone",
+      "rule": "Beschränkung {number}",
+      "matches": "Ohne Auswahl gelten alle Monate bzw. Wochentage.",
+      "months": "Monate",
+      "weekdays": "Wochentage",
+      "start": "Beginn (einschließlich)",
+      "end": "Ende (ausschließlich)",
+      "remove": "Beschränkung entfernen",
+      "add": "Beschränkung hinzufügen",
+      "blocked": "Smart-Laden durch Zeitplan pausiert.",
+      "next": "Nächster Wechsel: {time}",
+      "saved": "Ladebeschränkungen gespeichert."
+    }
   },
   "notifications": {
     "dismissAll": "Meldungen entfernen",

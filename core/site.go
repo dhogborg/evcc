@@ -94,6 +94,8 @@ type Site struct {
 	batteryGridDischargeLimit *float64 // grid discharging (feed-in) limit
 	batteryGridDischarge      bool     // allow battery discharge to grid (experimental)
 
+	importControl hourlyImportControl
+
 	// grid settings
 	gridExportLimit float64 // static grid export power limit in W, 0 = disabled
 
@@ -493,6 +495,8 @@ func (site *Site) restoreSettings() error {
 			return err
 		}
 	}
+	site.restoreHourlyImport()
+
 	if v, err := settings.Float(keys.GridExportLimit); err == nil {
 		if err := site.SetGridExportLimit(v); err != nil {
 			return err
@@ -1044,8 +1048,10 @@ func (site *Site) updateGridMeter() error {
 		return errors.New("grid meter disabled, restart required")
 	}
 
+	powerAvailable := false
 	if res, err := backoff.RetryWithData(meter.CurrentPower, modbus.Backoff()); err == nil {
 		mm.Power = res
+		powerAvailable = finite(res)
 
 		site.Lock()
 		site.gridPower = res
@@ -1102,6 +1108,11 @@ func (site *Site) updateGridMeter() error {
 		c.AddEnergy(mm.Energy, mm.ReturnEnergy, mm.Power)
 	}
 
+	if powerAvailable {
+		site.recordHourlyImport(time.Now(), mm)
+	} else {
+		site.invalidateHourlyImport()
+	}
 	site.publish(keys.Grid, mm)
 
 	return nil
@@ -1350,7 +1361,11 @@ func (site *Site) update(lp updater) {
 
 	if state, err := site.updateMeters(); err != nil {
 		site.log.ERROR.Println(err)
+		site.invalidateHourlyImport()
+		site.enforceImportAndSchedules()
 	} else {
+		site.prepareHourlyImport(totalChargePower)
+		site.enforceImportAndSchedules()
 		if sponsor.IsAuthorized() && optimizerEnabled() {
 			site.reapplySuggestions(time.Now())
 		} else {
@@ -1483,6 +1498,7 @@ func (site *Site) prepare() {
 	site.publish(keys.BatteryDischargeControl, site.batteryDischargeControl)
 	site.publish(keys.BatteryGridDischarge, site.batteryGridDischarge)
 	site.publish(keys.SolarAdjusted, site.solarAdjusted)
+	site.publish(keys.HourlyImportLimit, site.GetHourlyImportLimit())
 	site.publish(keys.ResidualPower, site.GetResidualPower())
 	site.publish(keys.GridExportLimit, site.GetGridExportLimit())
 	site.publish(keys.ProfilePercentile, site.GetProfilePercentile())

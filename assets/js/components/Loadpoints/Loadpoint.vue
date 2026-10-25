@@ -53,6 +53,9 @@
 			}}
 		</div>
 
+		<p v-if="scheduleBlocked" class="alert alert-warning py-2" role="status">
+			<Lock class="me-2" />{{ $t("main.chargingRestrictions.blocked") }}
+		</p>
 		<div class="details d-flex align-items-start mb-2">
 			<div>
 				<div class="d-flex align-items-center">
@@ -121,6 +124,7 @@ import collector from "@/mixins/collector.js";
 import SettingsButton from "./SettingsButton.vue";
 import SettingsModal from "./SettingsModal.vue";
 import VehicleIcon from "../VehicleIcon";
+import Lock from "../MaterialIcon/Lock.vue";
 import SessionInfo from "./SessionInfo.vue";
 import { defineComponent, type PropType } from "vue";
 import type {
@@ -142,6 +146,7 @@ import type {
 export default defineComponent({
 	name: "Loadpoint",
 	components: {
+		Lock,
 		Mode,
 		Vehicle: VehicleComponent,
 		Phases,
@@ -152,6 +157,7 @@ export default defineComponent({
 	},
 	mixins: [formatter, collector],
 	props: {
+		scheduleBlocked: Boolean,
 		id: { type: String, required: true },
 		single: Boolean,
 

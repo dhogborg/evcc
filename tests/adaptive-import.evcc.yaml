@@ -1,0 +1,25 @@
+interval: 0.1s
+site:
+  title: Adaptive import test
+  meters:
+    grid: grid
+meters:
+  - name: grid
+    type: custom
+    power:
+      source: const
+      value: 1000
+    energy:
+      source: const
+      value: 100
+loadpoints:
+  - title: Carport
+    charger: charger
+    mode: now
+chargers:
+  - name: charger
+    type: template
+    template: demo-charger
+    status: B
+    enabled: false
+    power: 0

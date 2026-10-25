@@ -28,7 +28,9 @@ func getLoadpointStaticConfig(lp loadpoint.API) loadpoint.StaticConfig {
 
 func getLoadpointDynamicConfig(lp loadpoint.API) loadpoint.DynamicConfig {
 	planTime, planEnergy := lp.GetPlanEnergy()
+	restrictions := lp.GetChargingRestrictions()
 	return loadpoint.DynamicConfig{
+		ChargingRestrictions:     &restrictions,
 		Title:                    lp.GetTitle(),
 		DefaultMode:              string(lp.GetDefaultMode()),
 		AlwaysCharge:             string(lp.GetAlwaysCharge()),

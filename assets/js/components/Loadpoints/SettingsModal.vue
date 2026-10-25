@@ -202,6 +202,13 @@
 					</select>
 				</div>
 			</div>
+			<ChargingRestrictions
+				v-if="id"
+				:id="id"
+				:value="loadpoint?.chargingRestrictions"
+				:blocked="loadpoint?.scheduleBlocked"
+				:next-transition="loadpoint?.scheduleNextTransition || undefined"
+			/>
 		</div>
 	</GenericModal>
 </template>
@@ -225,6 +232,7 @@ import {
 	type UiLoadpoint,
 } from "@/types/evcc";
 import api from "@/api";
+import ChargingRestrictions from "./ChargingRestrictions.vue";
 
 const range = (start: number, stop: number, step = -1) =>
 	Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
@@ -243,6 +251,7 @@ const { AUTO, THREE_PHASES, ONE_PHASE } = PHASES;
 export default defineComponent({
 	name: "LoadpointSettingsModal",
 	components: {
+		ChargingRestrictions,
 		GenericModal,
 		SmartCostLimit,
 		SmartFeedInPriority,

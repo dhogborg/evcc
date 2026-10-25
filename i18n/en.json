@@ -1164,6 +1164,21 @@
       "template": "Manufacturer",
       "titleAdd": "Add Vehicle",
       "titleEdit": "Edit Vehicle"
+    },
+    "hourlyImport": {
+      "title": "Hourly import limit",
+      "enabled": "Enable hourly import limit",
+      "limit": "Maximum imported energy per clock hour",
+      "description": "Charging power adapts to keep grid imports within the configured energy budget for each clock hour, for example 13:00–14:00. The budget includes all household consumption. The controller converts the remaining kWh and time into a power allowance in kW.",
+      "caution": "A cumulative grid import meter is required. Exports do not replenish the budget. Charging pauses if readings are unavailable or the current hour cannot be reconstructed. A safety reserve covers measurement and charger delays. Uncontrolled appliances can still exceed the budget. Clock hours use Europe/Stockholm.",
+      "readings": "Imported: {used} kWh · Remaining: {remaining} kWh · Grid allowance: {power} kW",
+      "status": {
+        "disabled": "Disabled.",
+        "active": "Adaptive import control is active.",
+        "exhausted": "Hourly energy budget exhausted. Charging requires sufficient local generation.",
+        "awaitingHour": "Current-hour baseline unavailable. Charging pauses until the next clock hour with valid readings.",
+        "meterUnavailable": "Grid import readings are unavailable or stale. Charging is paused."
+      }
     }
   },
   "footer": {
@@ -1837,7 +1852,24 @@
       "waitForVehicle": "Ready. Waiting for vehicle…",
       "welcome": "Short initial charge to confirm connection."
     },
-    "vehicles": "Parking"
+    "vehicles": "Parking",
+    "chargingRestrictions": {
+      "title": "Charging restrictions",
+      "description": "Block charging during recurring intervals in Smart mode. Fast mode bypasses these restrictions. The hourly import limit applies in every mode. An end before the start spans midnight and uses the starting day’s months and weekdays.",
+      "enabled": "Enable Smart-mode restrictions",
+      "timezone": "Timezone",
+      "rule": "Restriction {number}",
+      "matches": "Empty month or weekday selections match all months or days.",
+      "months": "Months",
+      "weekdays": "Weekdays",
+      "start": "Start (inclusive)",
+      "end": "End (exclusive)",
+      "remove": "Remove restriction",
+      "add": "Add restriction",
+      "blocked": "Smart charging paused by schedule.",
+      "next": "Next schedule change: {time}",
+      "saved": "Charging restrictions saved."
+    }
   },
   "notifications": {
     "dismissAll": "Dismiss all",

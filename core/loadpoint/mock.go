@@ -279,6 +279,20 @@ func (mr *MockAPIMockRecorder) GetChargerRef() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChargerRef", reflect.TypeOf((*MockAPI)(nil).GetChargerRef))
 }
 
+// GetChargingRestrictions mocks base method.
+func (m *MockAPI) GetChargingRestrictions() ChargingRestrictions {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetChargingRestrictions")
+	ret0, _ := ret[0].(ChargingRestrictions)
+	return ret0
+}
+
+// GetChargingRestrictions indicates an expected call of GetChargingRestrictions.
+func (mr *MockAPIMockRecorder) GetChargingRestrictions() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChargingRestrictions", reflect.TypeOf((*MockAPI)(nil).GetChargingRestrictions))
+}
+
 // GetCircuit mocks base method.
 func (m *MockAPI) GetCircuit() api.Circuit {
 	m.ctrl.T.Helper()
@@ -915,6 +929,20 @@ func (m *MockAPI) SetChargerRef(arg0 string) {
 func (mr *MockAPIMockRecorder) SetChargerRef(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetChargerRef", reflect.TypeOf((*MockAPI)(nil).SetChargerRef), arg0)
+}
+
+// SetChargingRestrictions mocks base method.
+func (m *MockAPI) SetChargingRestrictions(arg0 ChargingRestrictions) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetChargingRestrictions", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetChargingRestrictions indicates an expected call of SetChargingRestrictions.
+func (mr *MockAPIMockRecorder) SetChargingRestrictions(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetChargingRestrictions", reflect.TypeOf((*MockAPI)(nil).SetChargingRestrictions), arg0)
 }
 
 // SetCircuitRef mocks base method.

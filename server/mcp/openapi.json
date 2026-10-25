@@ -797,6 +797,65 @@
         }
       }
     },
+    "/loadpoints/{id}/chargingrestrictions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/id"
+        }
+      ],
+      "get": {
+        "operationId": "getChargingRestrictions",
+        "summary": "Get recurring Smart-mode restrictions",
+        "tags": [
+          "loadpoints"
+        ],
+        "responses": {
+          "200": {
+            "description": "Loadpoint schedule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChargingRestrictions"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "setChargingRestrictions",
+        "summary": "Replace recurring Smart-mode restrictions",
+        "description": "Start is inclusive and end exclusive. Empty months or weekdays match all. Overnight intervals use the starting date. Fast mode bypasses the schedule; the hourly import budget applies in every mode.",
+        "tags": [
+          "loadpoints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChargingRestrictions"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saved loadpoint schedule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChargingRestrictions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid timezone, calendar selections or interval"
+          }
+        }
+      }
+    },
     "/loadpoints/{id}/mode/{mode}": {
       "post": {
         "operationId": "setLoadpointMode",
@@ -1350,6 +1409,36 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/NumberResult"
+          }
+        }
+      }
+    },
+    "/hourlyimportlimit/{energy}": {
+      "post": {
+        "operationId": "setHourlyImportLimit",
+        "summary": "Set clock-hour grid import energy budget",
+        "description": "Maximum grid import in kWh per clock hour in Europe/Stockholm. Zero disables the budget. Exports do not replenish it. Requires a cumulative import meter. All charging modes respect the budget; uncontrolled household loads may still exceed it.",
+        "tags": [
+          "general"
+        ],
+        "parameters": [
+          {
+            "name": "energy",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NumberResult"
+          },
+          "400": {
+            "description": "Invalid limit or grid meter lacks cumulative import energy"
           }
         }
       }
@@ -3550,6 +3639,58 @@
           "once"
         ]
       },
+      "ChargingRestrictionRule": {
+        "description": "A charging location with a charger, an optional dedicated meter and an optional vehicle.",
+        "type": "object",
+        "properties": {
+          "months": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "start": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "months",
+          "weekdays",
+          "start",
+          "end"
+        ]
+      },
+      "ChargingRestrictions": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChargingRestrictionRule"
+            }
+          }
+        },
+        "required": [
+          "enabled",
+          "timezone",
+          "rules"
+        ]
+      },
       "ChargeMode": {
         "description": "Charging mode.",
         "type": "string",
@@ -3741,9 +3882,21 @@
         ]
       },
       "Loadpoint": {
-        "description": "A charging location with a charger, an optional dedicated meter and an optional vehicle.",
         "type": "object",
         "properties": {
+          "chargingRestrictions": {
+            "$ref": "#/components/schemas/ChargingRestrictions",
+            "description": "Recurring local intervals blocking Smart charging only."
+          },
+          "scheduleBlocked": {
+            "description": "Smart charging is currently blocked by a recurring interval.",
+            "type": "boolean"
+          },
+          "scheduleNextTransition": {
+            "description": "Next combined schedule transition, with UTC offset.",
+            "type": "string",
+            "nullable": true
+          },
           "name": {
             "description": "Unique loadpoint identifier used in API routes and configuration.",
             "type": "string"
@@ -5885,6 +6038,38 @@
           "residualPower": {
             "description": "Configured grid operating point in W. Positive values maintain grid import.",
             "type": "number"
+          },
+          "hourlyImportLimit": {
+            "description": "Maximum grid import per clock hour in kWh. Zero disables the budget.",
+            "type": "number"
+          },
+          "hourlyImport": {
+            "description": "Current clock-hour accounting and permitted grid power in W.",
+            "type": "object",
+            "properties": {
+              "used": {
+                "type": "number"
+              },
+              "remaining": {
+                "type": "number"
+              },
+              "allowedPower": {
+                "type": "number"
+              },
+              "reset": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "used",
+              "remaining",
+              "allowedPower",
+              "reset",
+              "status"
+            ]
           },
           "gridExportLimit": {
             "description": "Static grid export power limit in W used as optimizer constraint, 0 = disabled. An active HEMS curtailment takes precedence.",

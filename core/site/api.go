@@ -14,6 +14,8 @@ type Publisher interface {
 
 // API is the external site API
 type API interface {
+	GetHourlyImportLimit() float64
+	SetHourlyImportLimit(float64) error
 	Publisher
 
 	Loadpoints() []loadpoint.API

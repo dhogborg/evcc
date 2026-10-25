@@ -58,6 +58,12 @@
 			:text="controlStatus"
 			@edit="openModal('control')"
 		/>
+		<GeneralConfigEntry
+			test-id="generalconfig-hourlyimport"
+			:label="$t('config.hourlyImport.title')"
+			:text="importStatus"
+			@edit="openModal('hourlyImport')"
+		/>
 	</div>
 </template>
 
@@ -89,6 +95,10 @@ export default {
 		},
 		networkStatus() {
 			return `${store.state?.network?.port ?? ""}`;
+		},
+		importStatus() {
+			const limit = store.state?.hourlyImportLimit;
+			return limit ? `${this.fmtNumber(limit)} kWh/h` : this.$t("config.general.off");
 		},
 		controlStatus() {
 			const sec = store.state?.interval;

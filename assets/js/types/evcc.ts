@@ -253,6 +253,16 @@ export interface State {
   homePower?: number;
   /** Configured grid operating point in W. Positive values maintain grid import. */
   residualPower?: number;
+  /** Maximum grid import per clock hour in kWh. Zero disables the budget. */
+  hourlyImportLimit?: number;
+  /** Current clock-hour accounting and permitted grid power in W. */
+  hourlyImport?: {
+    used: number;
+    remaining: number;
+    allowedPower: number;
+    reset: string;
+    status: string;
+  };
   /** Static grid export power limit in W used as optimizer constraint, 0 = disabled. An active HEMS curtailment takes precedence. */
   gridExportLimit?: number;
   /** Percentile of the historic energy profiles used for demand prediction in %, e.g. 50 = median. Null uses the average. */
@@ -609,7 +619,26 @@ export enum TIME_FORMAT {
 }
 
 /** A charging location with a charger, an optional dedicated meter and an optional vehicle. */
+export interface ChargingRestrictionRule {
+  months: number[];
+  weekdays: number[];
+  start: string;
+  end: string;
+}
+
+export interface ChargingRestrictions {
+  enabled: boolean;
+  timezone: string;
+  rules: ChargingRestrictionRule[];
+}
+
 export interface Loadpoint {
+  /** Recurring local intervals blocking Smart charging only. */
+  chargingRestrictions?: ChargingRestrictions;
+  /** Smart charging is currently blocked by a recurring interval. */
+  scheduleBlocked?: boolean;
+  /** Next combined schedule transition, with UTC offset. */
+  scheduleNextTransition?: string | null;
   /** Unique loadpoint identifier used in API routes and configuration. */
   name: string;
   /** Always charge state. Smart mode charges continuously at least at minimum power. */

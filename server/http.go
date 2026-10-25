@@ -193,6 +193,7 @@ func (s *HTTPd) RegisterSiteHandlers(site site.API) {
 		"batterymode":                     {"POST", "/batterymode/{value:[a-z]+}", updateBatteryMode(site)},
 		"batterymodedelete":               {"DELETE", "/batterymode", updateBatteryMode(site)},
 		"prioritysoc":                     {"POST", "/prioritysoc/{value:[0-9.]+}", floatHandler(site.SetPrioritySoc, site.GetPrioritySoc)},
+		"hourlyimportlimit":               {"POST", "/hourlyimportlimit/{value:[0-9.]+}", floatHandler(site.SetHourlyImportLimit, site.GetHourlyImportLimit)},
 		"residualpower":                   {"POST", "/residualpower/{value:-?[0-9.]+}", floatHandler(site.SetResidualPower, site.GetResidualPower)},
 		"gridexportlimit":                 {"POST", "/gridexportlimit/{value:[0-9.]+}", floatHandler(site.SetGridExportLimit, site.GetGridExportLimit)},
 		"profilepercentile":               {"POST", "/profilepercentile/{value:[0-9.]+}", floatPtrHandler(site.SetProfilePercentile, site.GetProfilePercentile)},
@@ -245,6 +246,8 @@ func (s *HTTPd) RegisterSiteHandlers(site site.API) {
 		api := api.PathPrefix(fmt.Sprintf("/loadpoints/%d", id+1)).Subrouter()
 
 		routes := map[string]route{
+			"restrictions":              {"POST", "/chargingrestrictions", chargingRestrictionsHandler(lp)},
+			"restrictionsGet":           {"GET", "/chargingrestrictions", chargingRestrictionsHandler(lp)},
 			"mode":                      {"POST", "/mode/{value:[a-z]+}", handler(eapi.ChargeModeString, pass(lp.SetMode), lp.GetMode)},
 			"alwaysCharge":              {"POST", "/alwayscharge/{value:[a-z]+}", handler(eapi.AlwaysChargeString, lp.SetAlwaysCharge, lp.GetAlwaysCharge)},
 			"limitsoc":                  {"POST", "/limitsoc/{value:[0-9]+}", intHandler(pass(lp.SetLimitSoc), lp.GetLimitSoc)},

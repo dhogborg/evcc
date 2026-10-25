@@ -157,6 +157,11 @@ type Loadpoint struct {
 	coordinator    coordinator.API
 	socEstimator   *soc.Estimator
 
+	restrictions         loadpoint.ChargingRestrictions
+	restrictionTimer     *clock.Timer
+	restrictionNext      time.Time
+	restrictionScheduled bool
+
 	// charge planning
 	planner          *planner.Planner
 	planTime         time.Time        // time goal
@@ -446,6 +451,8 @@ func (lp *Loadpoint) restoreSettings() {
 	if err1 == nil && err2 == nil {
 		lp.setPlanEnergy(t, v)
 	}
+
+	lp.restoreChargingRestrictions()
 
 	// load plan strategy (continuous mode and precondition duration)
 	var planStrategy api.PlanStrategy
@@ -897,7 +904,7 @@ func (lp *Loadpoint) syncCharger() error {
 		// treat as enabled when charging for further validations
 		enabled = true
 
-		if shouldBeConsistent {
+		if shouldBeConsistent && !lp.scheduleBlocked() && lp.importAllowsEnable() {
 			if err := lp.charger.Enable(true); err != nil { // also enable charger to correct internal state
 				return fmt.Errorf("charger enable: %w", err)
 			}
@@ -955,7 +962,7 @@ func (lp *Loadpoint) syncCharger() error {
 	case enabled == lp.enabled:
 		// sync disabled state
 
-	case !enabled && !lp.phaseSwitchCompleted():
+	case !enabled && !lp.phaseSwitchCompleted() && !lp.scheduleBlocked() && lp.importAllowsEnable():
 		// some chargers (i.E. Easee in some configurations) disable themselves to be able to switch phases
 		// -> enable charger
 		if err := lp.charger.Enable(true); err != nil {
@@ -998,6 +1005,9 @@ func (lp *Loadpoint) actualMaxChargeCurrent() float64 {
 
 // setLimit applies charger current limits and enables/disables accordingly
 func (lp *Loadpoint) setLimit(current float64) error {
+	if lp.scheduleBlocked() {
+		current = 0
+	}
 	current = lp.roundedCurrent(current)
 
 	// apply circuit limits
@@ -1033,6 +1043,16 @@ func (lp *Loadpoint) setLimit(current float64) error {
 	effMinCurrent := lp.effectiveMinCurrent()
 	if effMaxCurrent := lp.effectiveMaxCurrent(); effMinCurrent > effMaxCurrent {
 		return fmt.Errorf("invalid config: min current %.3gA exceeds max current %.3gA", effMinCurrent, effMaxCurrent)
+	}
+
+	// Apply the import budget after circuit handling, including its minimum-current exception.
+	if limiter, ok := lp.site.(interface {
+		limitImportPower(*Loadpoint, float64) float64
+	}); ok {
+		requested := grid.CurrentToPower(current, lp.ActivePhases())
+		if allowed := limiter.limitImportPower(lp, requested); allowed < requested {
+			current = lp.roundedCurrent(grid.PowerToCurrent(allowed, lp.ActivePhases()))
+		}
 	}
 
 	// set current
@@ -2469,6 +2489,8 @@ func (lp *Loadpoint) phaseSwitchCompleted() bool {
 
 // Update is the main control function. It reevaluates meters and charger state
 func (lp *Loadpoint) Update(sitePower, batteryPower float64, consumption, feedin api.Rates, batteryBuffered, batteryStart bool, greenShare float64, effPrice, effCo2 *float64, dim *bool) {
+	lp.publishChargingRestriction()
+
 	// hold battery boost when SOC drops below the limit: stop draining the battery, but
 	// keep the vehicle prioritised over recharging it (via sitePower priorityAdjustment)
 	// until the vehicle disconnects or the limit is relaxed (see SetBatteryBoostLimit).
@@ -2609,6 +2631,9 @@ NO_DIM:
 	case !lp.connected():
 		// always disable charger if not connected
 		// https://github.com/evcc-io/evcc/issues/105
+		err = lp.setLimit(0)
+
+	case lp.scheduleBlocked():
 		err = lp.setLimit(0)
 
 	case lp.scalePhasesRequired():

@@ -100,6 +100,7 @@ func TestPersistedSettingsAreValidConfig(t *testing.T) {
 		Poll: loadpoint.PollConfig{Mode: loadpoint.PollAlways, Interval: 42 * time.Minute},
 	})
 	lp.SetUI(loadpoint.UIConfig{MinTemp: 20, MaxTemp: 45})
+	require.NoError(t, lp.SetChargingRestrictions(loadpoint.ChargingRestrictions{Enabled: true, Timezone: "Europe/Stockholm", Rules: []loadpoint.RestrictionRule{{Start: "07:00", End: "20:00"}}}))
 	require.NoError(t, lp.SetPlanEnergy(planTime, 7))
 	require.NoError(t, lp.SetPlanStrategy(api.PlanStrategy{Continuous: true}))
 

@@ -210,3 +210,20 @@ func planStrategyHandler(lp loadpoint.API) http.HandlerFunc {
 		jsonWrite(w, res)
 	}
 }
+
+func chargingRestrictionsHandler(lp loadpoint.API) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			var value loadpoint.ChargingRestrictions
+			if err := jsonDecoder(http.MaxBytesReader(w, r.Body, 64<<10)).Decode(&value); err != nil {
+				jsonError(w, http.StatusBadRequest, err)
+				return
+			}
+			if err := lp.SetChargingRestrictions(value); err != nil {
+				jsonError(w, http.StatusBadRequest, err)
+				return
+			}
+		}
+		jsonWrite(w, lp.GetChargingRestrictions())
+	}
+}

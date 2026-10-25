@@ -18,6 +18,7 @@ type StaticConfig struct {
 }
 
 type DynamicConfig struct {
+	ChargingRestrictions *ChargingRestrictions `json:"chargingRestrictions,omitempty"`
 	// dynamic config
 	Title                    string    `json:"title"`
 	DefaultMode              string    `json:"defaultMode"`
@@ -71,6 +72,11 @@ func SplitConfig(payload map[string]any) (DynamicConfig, map[string]any, error) 
 }
 
 func (payload DynamicConfig) Apply(lp API) error {
+	if payload.ChargingRestrictions != nil {
+		if err := lp.SetChargingRestrictions(*payload.ChargingRestrictions); err != nil {
+			return err
+		}
+	}
 	lp.SetTitle(payload.Title)
 	lp.SetPriority(payload.Priority)
 	// limits the optimizer controls are rejected, the remaining config still applies

@@ -487,6 +487,40 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/NumberResult"
+  /loadpoints/{id}/chargingrestrictions:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      operationId: getChargingRestrictions
+      summary: Get recurring Smart-mode restrictions
+      tags: [loadpoints]
+      responses:
+        "200":
+          description: Loadpoint schedule
+          content:
+            application/json:
+              schema:
+                $ref: "./openapi.state.yaml#/components/schemas/ChargingRestrictions"
+    post:
+      operationId: setChargingRestrictions
+      summary: Replace recurring Smart-mode restrictions
+      description: Start is inclusive and end exclusive. Empty months or weekdays match all. Overnight intervals use the starting date. Fast mode bypasses the schedule; the hourly import budget applies in every mode.
+      tags: [loadpoints]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./openapi.state.yaml#/components/schemas/ChargingRestrictions"
+      responses:
+        "200":
+          description: Saved loadpoint schedule
+          content:
+            application/json:
+              schema:
+                $ref: "./openapi.state.yaml#/components/schemas/ChargingRestrictions"
+        "400":
+          description: Invalid timezone, calendar selections or interval
   /loadpoints/{id}/mode/{mode}:
     post:
       operationId: setLoadpointMode
@@ -812,6 +846,25 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/NumberResult"
+  /hourlyimportlimit/{energy}:
+    post:
+      operationId: setHourlyImportLimit
+      summary: Set clock-hour grid import energy budget
+      description: Maximum grid import in kWh per clock hour in Europe/Stockholm. Zero disables the budget. Exports do not replenish it. Requires a cumulative import meter. All charging modes respect the budget; uncontrolled household loads may still exceed it.
+      tags: [general]
+      parameters:
+        - name: energy
+          in: path
+          required: true
+          schema:
+            type: number
+            minimum: 0
+            maximum: 1000000
+      responses:
+        "200":
+          $ref: "#/components/responses/NumberResult"
+        "400":
+          description: Invalid limit or grid meter lacks cumulative import energy
   /residualpower/{power}:
     post:
       operationId: setResidualPower

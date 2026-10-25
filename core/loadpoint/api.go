@@ -25,6 +25,8 @@ func SurplusFlexible(lp API) bool {
 
 // API is the external loadpoint API
 type API interface {
+	GetChargingRestrictions() ChargingRestrictions
+	SetChargingRestrictions(ChargingRestrictions) error
 	//
 	// status
 	//

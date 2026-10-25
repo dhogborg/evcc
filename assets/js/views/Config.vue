@@ -559,6 +559,7 @@
 				<MqttModal @changed="loadDirty" />
 				<NetworkModal @changed="loadDirty" />
 				<ControlModal @changed="loadDirty" />
+				<HourlyImportModal />
 				<HemsModal
 					:id="hemsDevices[0]?.id"
 					:yamlSource="hems?.yamlSource"
@@ -641,6 +642,7 @@ import CircuitsIcon from "../components/MaterialIcon/Circuits.vue";
 import CircuitsModal from "../components/Config/CircuitsModal.vue";
 import CircuitTags, { type CircuitLoadpoint } from "../components/Config/CircuitTags.vue";
 import collector from "../mixins/collector";
+import HourlyImportModal from "../components/Config/HourlyImportModal.vue";
 import ControlModal from "../components/Config/ControlModal.vue";
 import CurtailerModal from "../components/Config/CurtailerModal.vue";
 import CurtailIcon from "../components/MaterialIcon/Curtail.vue";
@@ -765,6 +767,7 @@ export default defineComponent({
 		CircuitModal,
 		CircuitTags,
 		ControlModal,
+		HourlyImportModal,
 		CurtailerModal,
 		CurtailIcon,
 		DeviceCard,
